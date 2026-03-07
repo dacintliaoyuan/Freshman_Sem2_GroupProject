@@ -8,6 +8,14 @@
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
+	.globl _seg_code
+	.globl _main
+	.globl _Timer0_ISR
+	.globl _Timer0_Init
+	.globl _display
+	.globl _delay
+	.globl _BTN_CLEAR
+	.globl _BTN_START_STOP
 	.globl _CY
 	.globl _AC
 	.globl _F0
@@ -131,6 +139,10 @@
 	.globl _DPL
 	.globl _SP
 	.globl _P0
+	.globl _is_running
+	.globl _count_10ms
+	.globl _min
+	.globl _sec
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -264,6 +276,10 @@ _RS1	=	0x00d4
 _F0	=	0x00d5
 _AC	=	0x00d6
 _CY	=	0x00d7
+_BTN_START_STOP::
+	.ds 1
+_BTN_CLEAR::
+	.ds 1
 ;--------------------------------------------------------
 ; overlayable register banks
 ;--------------------------------------------------------
@@ -273,9 +289,23 @@ _CY	=	0x00d7
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
+_sec::
+	.ds 1
+_min::
+	.ds 1
+_count_10ms::
+	.ds 1
 ;--------------------------------------------------------
 ; overlayable items in internal ram
 ;--------------------------------------------------------
+	.area	OSEG    (OVR,DATA)
+;--------------------------------------------------------
+; Stack segment in internal ram
+;--------------------------------------------------------
+	.area SSEG
+__start__stack:
+	.ds	1
+
 ;--------------------------------------------------------
 ; indirectly addressable internal ram data
 ;--------------------------------------------------------
@@ -289,6 +319,8 @@ _CY	=	0x00d7
 ; bit data
 ;--------------------------------------------------------
 	.area BSEG    (BIT)
+_is_running::
+	.ds 1
 ;--------------------------------------------------------
 ; paged external ram data
 ;--------------------------------------------------------
@@ -316,22 +348,332 @@ _CY	=	0x00d7
 	.area GSFINAL (CODE)
 	.area CSEG    (CODE)
 ;--------------------------------------------------------
+; interrupt vector
+;--------------------------------------------------------
+	.area HOME    (CODE)
+__interrupt_vect:
+	ljmp	__sdcc_gsinit_startup
+	reti
+	.ds	7
+	ljmp	_Timer0_ISR
+; restartable atomic support routines
+	.ds	2
+sdcc_atomic_exchange_rollback_start::
+	nop
+	nop
+sdcc_atomic_exchange_pdata_impl:
+	movx	a, @r0
+	mov	r3, a
+	mov	a, r2
+	movx	@r0, a
+	sjmp	sdcc_atomic_exchange_exit
+	nop
+	nop
+sdcc_atomic_exchange_xdata_impl:
+	movx	a, @dptr
+	mov	r3, a
+	mov	a, r2
+	movx	@dptr, a
+	sjmp	sdcc_atomic_exchange_exit
+sdcc_atomic_compare_exchange_idata_impl:
+	mov	a, @r0
+	cjne	a, ar2, .+#5
+	mov	a, r3
+	mov	@r0, a
+	ret
+	nop
+sdcc_atomic_compare_exchange_pdata_impl:
+	movx	a, @r0
+	cjne	a, ar2, .+#5
+	mov	a, r3
+	movx	@r0, a
+	ret
+	nop
+sdcc_atomic_compare_exchange_xdata_impl:
+	movx	a, @dptr
+	cjne	a, ar2, .+#5
+	mov	a, r3
+	movx	@dptr, a
+	ret
+sdcc_atomic_exchange_rollback_end::
+
+sdcc_atomic_exchange_gptr_impl::
+	jnb	b.6, sdcc_atomic_exchange_xdata_impl
+	mov	r0, dpl
+	jb	b.5, sdcc_atomic_exchange_pdata_impl
+sdcc_atomic_exchange_idata_impl:
+	mov	a, r2
+	xch	a, @r0
+	mov	dpl, a
+	ret
+sdcc_atomic_exchange_exit:
+	mov	dpl, r3
+	ret
+sdcc_atomic_compare_exchange_gptr_impl::
+	jnb	b.6, sdcc_atomic_compare_exchange_xdata_impl
+	mov	r0, dpl
+	jb	b.5, sdcc_atomic_compare_exchange_pdata_impl
+	sjmp	sdcc_atomic_compare_exchange_idata_impl
+;--------------------------------------------------------
 ; global & static initialisations
 ;--------------------------------------------------------
 	.area HOME    (CODE)
 	.area GSINIT  (CODE)
 	.area GSFINAL (CODE)
 	.area GSINIT  (CODE)
+	.globl __sdcc_gsinit_startup
+	.globl __sdcc_program_startup
+	.globl __start__stack
+	.globl __mcs51_genXINIT
+	.globl __mcs51_genXRAMCLEAR
+	.globl __mcs51_genRAMCLEAR
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:9: unsigned char sec = 0;
+	mov	_sec,#0x00
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:10: unsigned char min = 0;
+	mov	_min,#0x00
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:11: unsigned char count_10ms = 0;
+	mov	_count_10ms,#0x00
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:12: __bit is_running = 0;
+;	assignBit
+	clr	_is_running
+	.area GSFINAL (CODE)
+	ljmp	__sdcc_program_startup
 ;--------------------------------------------------------
 ; Home
 ;--------------------------------------------------------
 	.area HOME    (CODE)
 	.area HOME    (CODE)
+__sdcc_program_startup:
+	ljmp	_main
+;	return from main will return to caller
 ;--------------------------------------------------------
 ; code
 ;--------------------------------------------------------
 	.area CSEG    (CODE)
+;------------------------------------------------------------
+;Allocation info for local variables in function 'delay'
+;------------------------------------------------------------
+;t             Allocated to registers 
+;------------------------------------------------------------
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:19: void delay(unsigned int t) {
+;	-----------------------------------------
+;	 function delay
+;	-----------------------------------------
+_delay:
+	ar7 = 0x07
+	ar6 = 0x06
+	ar5 = 0x05
+	ar4 = 0x04
+	ar3 = 0x03
+	ar2 = 0x02
+	ar1 = 0x01
+	ar0 = 0x00
+	mov	r6, dpl
+	mov	r7, dph
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:20: while(t--);
+00101$:
+	mov	ar4,r6
+	mov	ar5,r7
+	dec	r6
+	cjne	r6,#0xff,00113$
+	dec	r7
+00113$:
+	mov	a,r4
+	orl	a,r5
+	jnz	00101$
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:21: }
+	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'display'
+;------------------------------------------------------------
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:23: void display() {
+;	-----------------------------------------
+;	 function display
+;	-----------------------------------------
+_display:
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:24: DIG_PORT = 0xFE; SEG_PORT = seg_code[min / 10]; delay(100); SEG_PORT = 0xFF;
+	mov	_P2,#0xfe
+	mov	r7,_min
+	mov	b,#0x0a
+	mov	a,r7
+	div	ab
+	mov	dptr,#_seg_code
+	movc	a,@a+dptr
+	mov	_P0,a
+	mov	dptr,#0x0064
+	lcall	_delay
+	mov	_P0,#0xff
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:25: DIG_PORT = 0xFD; SEG_PORT = seg_code[min % 10]; delay(100); SEG_PORT = 0xFF;
+	mov	_P2,#0xfd
+	mov	r7,_min
+	mov	b,#0x0a
+	mov	a,r7
+	div	ab
+	mov	a,b
+	mov	dptr,#_seg_code
+	movc	a,@a+dptr
+	mov	_P0,a
+	mov	dptr,#0x0064
+	lcall	_delay
+	mov	_P0,#0xff
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:26: DIG_PORT = 0xFB; SEG_PORT = seg_code[sec / 10]; delay(100); SEG_PORT = 0xFF;
+	mov	_P2,#0xfb
+	mov	r7,_sec
+	mov	b,#0x0a
+	mov	a,r7
+	div	ab
+	mov	dptr,#_seg_code
+	movc	a,@a+dptr
+	mov	_P0,a
+	mov	dptr,#0x0064
+	lcall	_delay
+	mov	_P0,#0xff
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:27: DIG_PORT = 0xF7; SEG_PORT = seg_code[sec % 10]; delay(100); SEG_PORT = 0xFF;
+	mov	_P2,#0xf7
+	mov	r7,_sec
+	mov	b,#0x0a
+	mov	a,r7
+	div	ab
+	mov	a,b
+	mov	dptr,#_seg_code
+	movc	a,@a+dptr
+	mov	_P0,a
+	mov	dptr,#0x0064
+	lcall	_delay
+	mov	_P0,#0xff
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:28: }
+	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'Timer0_Init'
+;------------------------------------------------------------
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:30: void Timer0_Init() {
+;	-----------------------------------------
+;	 function Timer0_Init
+;	-----------------------------------------
+_Timer0_Init:
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:31: TMOD &= 0xF0; TMOD |= 0x01;
+	anl	_TMOD,#0xf0
+	orl	_TMOD,#0x01
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:32: TH0 = 0xD8; TL0 = 0xF0;
+	mov	_TH0,#0xd8
+	mov	_TL0,#0xf0
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:33: ET0 = 1; EA = 1; TR0 = 0;
+;	assignBit
+	setb	_ET0
+;	assignBit
+	setb	_EA
+;	assignBit
+	clr	_TR0
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:34: }
+	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'Timer0_ISR'
+;------------------------------------------------------------
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:36: void Timer0_ISR() __interrupt (1) {
+;	-----------------------------------------
+;	 function Timer0_ISR
+;	-----------------------------------------
+_Timer0_ISR:
+	push	acc
+	push	psw
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:37: TH0 = 0xD8; TL0 = 0xF0;
+	mov	_TH0,#0xd8
+	mov	_TL0,#0xf0
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:38: count_10ms++;
+	inc	_count_10ms
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:39: if (count_10ms >= 100) {
+	mov	a,#0x100 - 0x64
+	add	a,_count_10ms
+	jnc	00107$
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:40: count_10ms = 0;
+	mov	_count_10ms,#0x00
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:41: if (++sec >= 60) { sec = 0; if (++min >= 60) min = 0; }
+	inc	_sec
+	mov	a,#0x100 - 0x3c
+	add	a,_sec
+	jnc	00107$
+	mov	_sec,#0x00
+	inc	_min
+	mov	a,#0x100 - 0x3c
+	add	a,_min
+	jnc	00107$
+	mov	_min,#0x00
+00107$:
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:43: }
+	pop	psw
+	pop	acc
+	reti
+;	eliminated unneeded mov psw,# (no regs used in bank)
+;	eliminated unneeded push/pop dpl
+;	eliminated unneeded push/pop dph
+;	eliminated unneeded push/pop b
+;------------------------------------------------------------
+;Allocation info for local variables in function 'main'
+;------------------------------------------------------------
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:45: void main() {
+;	-----------------------------------------
+;	 function main
+;	-----------------------------------------
+_main:
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:46: Timer0_Init();
+	lcall	_Timer0_Init
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:47: while(1) {
+00117$:
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:48: if (BTN_START_STOP == 0) {
+	jb	_BTN_START_STOP,00107$
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:49: delay(1000);
+	mov	dptr,#0x03e8
+	lcall	_delay
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:50: if (BTN_START_STOP == 0) {
+	jb	_BTN_START_STOP,00107$
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:51: is_running = !is_running;
+	cpl	_is_running
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:52: TR0 = is_running;
+;	assignBit
+	mov	c,_is_running
+	mov	_TR0,c
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:53: while(BTN_START_STOP == 0) display();
+00101$:
+	jb	_BTN_START_STOP,00107$
+	lcall	_display
+	sjmp	00101$
+00107$:
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:56: if (!is_running && BTN_CLEAR == 0) {
+	jb	_is_running,00114$
+	jb	_BTN_CLEAR,00114$
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:57: delay(1000);
+	mov	dptr,#0x03e8
+	lcall	_delay
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:58: if (BTN_CLEAR == 0) {
+	jb	_BTN_CLEAR,00114$
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:59: sec = 0; min = 0; count_10ms = 0;
+	mov	_sec,#0x00
+	mov	_min,#0x00
+	mov	_count_10ms,#0x00
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:60: while(BTN_CLEAR == 0) display();
+00108$:
+	jb	_BTN_CLEAR,00114$
+	lcall	_display
+	sjmp	00108$
+00114$:
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:63: display();
+	lcall	_display
+;	D:\git\github\Freshman_Sem2_GroupProject\ECEN1004Lab2024\main\main.c:65: }
+	sjmp	00117$
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
+	.area CONST   (CODE)
+_seg_code:
+	.db #0xc0	; 192
+	.db #0xf9	; 249
+	.db #0xa4	; 164
+	.db #0xb0	; 176
+	.db #0x99	; 153
+	.db #0x92	; 146
+	.db #0x82	; 130
+	.db #0xf8	; 248
+	.db #0x80	; 128
+	.db #0x90	; 144
+	.area CSEG    (CODE)
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)
