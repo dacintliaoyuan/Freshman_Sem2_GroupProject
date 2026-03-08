@@ -36,6 +36,11 @@ void timer0_init()
     EA  = 1;
     TR0 = 1;
 }
+
+
+
+
+
 //display time on 7-segment
 //这里要修改一下，之前的代码有个变量命名错误，导致显示不正确
 void display()
@@ -46,23 +51,15 @@ void display()
     m2 = minute%10;
     s1 = second/10;
     s2 = second%10;
+    p3 = seg_table[m1];
+    p2 = seg_table[m2];
+    p1 = seg_table[s1];
+    p0 = seg_table[s2];
 
-    P2 = 0x0E;
-    P0 = seg_table[m1];
-    delay(2);
 
-    P2 = 0x0D;
-    P0 = seg_table[m2];
-    delay(2);
 
-    P2 = 0x0B;
-    P0 = seg_table[s1];
-    delay(2);
 
-    P2 = 0x07;
-    P0 = seg_table[s2];
-    delay(2);
-}
+
 //timer0 interrupt service routine
 void timer0_ISR(void) __interrupt(1)
 {
@@ -89,8 +86,33 @@ void timer0_ISR(void) __interrupt(1)
         }
     }
 }
+//scan buttons
+void key_scan()
+{
+    if(START_STOP == 0)
+    {
+        delay(20);
+        if(START_STOP == 0)
+        {
+            running = !running;
+            while(START_STOP == 0);
+        }
+    }
+
+    if(CLEAR_KEY == 0)
+    {
+        delay(20);
+        if(CLEAR_KEY == 0)
+        {
+            running = 0;
+            minute = 0;
+            second = 0;
+            ms_count = 0;
+            while(CLEAR_KEY == 0);
+        }
+    }
+}
 //main function
-//这里的while1可以简化一下
 void main()
 {
     timer0_init();
@@ -98,30 +120,6 @@ void main()
     while(1)
     {
         display();
-
-        if(START_STOP == 0)
-        {
-            delay(20);
-            if(START_STOP == 0)
-            {
-                running = !running;
-                while(START_STOP == 0);
-            }
-        }
-
-        if(CLEAR_KEY == 0)
-        {
-            delay(20);
-            if(CLEAR_KEY == 0)
-            {
-                if(!running)
-                {
-                    minute = 0;
-                    second = 0;
-                }
-
-                while(CLEAR_KEY == 0);
-            }
-        }
+        key_scan();
     }
 }
