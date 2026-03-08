@@ -3,13 +3,14 @@
 #define uint unsigned int
 #define uchar unsigned char
 //buttons connected to P3.2 and P3.3
-__sbit START_STOP = P3^2;
-__sbit CLEAR_KEY  = P3^3;
+//这里可能要在DE-10上面编辑一下P3in的连接方式，确保START_STOP和CLEAR_KEY正确连接到P3.2和P3.3
+__sbit __at (0xB2)START_STOP;
+__sbit __at (0xB3)CLEAR_KEY;
 //7-segment code for digits 0-9
 __code uchar seg_table[] =
 {
-0x3f,0x06,0x5b,0x4f,0x66,
-0x6d,0x7d,0x07,0x7f,0x6f
+~0x3f,~0x06,~0x5b,~0x4f,~0x66,
+~0x6d,~0x7d,~0x07,~0x7f,~0x6f
 };
 
 uchar minute = 0;
@@ -22,27 +23,21 @@ void delay(uint t)
 {
     uint i,j;
     for(i=0;i<t;i++)
-        for(j=0;j<120;j++);
+        for(j=0;j<240;j++);
 }
 //timer0 initialization
 void timer0_init()
 {
     TMOD |= 0x01;
 
-    TH0 = 0xFC;
-    TL0 = 0x18;
+    TH0 = 0xF8;
+    TL0 = 0x30;
 
     ET0 = 1;
     EA  = 1;
     TR0 = 1;
 }
-
-
-
-
-
 //display time on 7-segment
-//这里要修改一下，之前的代码有个变量命名错误，导致显示不正确
 void display()
 {
     uchar m1,m2,s1,s2;
@@ -51,20 +46,16 @@ void display()
     m2 = minute%10;
     s1 = second/10;
     s2 = second%10;
-    p3 = seg_table[m1];
-    p2 = seg_table[m2];
-    p1 = seg_table[s1];
-    p0 = seg_table[s2];
-
-
-
-
-
+    P3 = seg_table[m1];
+    P2 = seg_table[m2];
+    P1 = seg_table[s1];
+    P0 = seg_table[s2];
+}
 //timer0 interrupt service routine
 void timer0_ISR(void) __interrupt(1)
 {
-    TH0 = 0xFC;
-    TL0 = 0x18;
+    TH0 = 0xF8;
+    TL0 = 0x30;
 
     if(running)
     {
