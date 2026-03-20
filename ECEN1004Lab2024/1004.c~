@@ -1,0 +1,50 @@
+#include <AT89x52.h>
+#define Min_disp_fen P3
+#define Min_disp_miao P2
+#define Sec_disp_fen P1
+#define Sec_disp_miao P0
+unsigned char second = 0, minute = 0;
+
+void watch_init(void) {
+    second = 0; minute = 0;
+    Min_disp_fen = 0; Min_disp_miao = 0;Sec_disp_fen =0;Sec_disp_miao =0;
+}
+
+
+void watch_start_stop(void) __interrupt 0 {
+    TR0 = !TR0;
+}
+
+
+void watch_clear(void) __interrupt 2 {
+    if (!TR0) {
+        watch_init();
+    }
+}
+
+
+void disp_update(void) __interrupt 1 {
+    static unsigned int count=0;
+    if(++count == 8000) {
+        count = 0;
+        if(++second>59) {
+            if(++minute>59) minute=0;
+            second=0;
+        }
+    }
+    Sec_disp_miao = second%10;
+    Sec_disp_fen = second/10;
+    //Sec_disp_fen = 10;
+    Min_disp_miao = minute%10;
+    Min_disp_fen = minute/10;
+}
+
+
+void main(void) {
+    TMOD = 0x02; TH0 = 256 - 20; TL0 = TH0;
+    IT0 = 1; IT1 = 1;
+    EX0 = 1; EX1 = 1; ET0 = 1;
+    watch_init();
+    EA = 1;
+    while(1);
+}
