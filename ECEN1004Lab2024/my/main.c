@@ -1,11 +1,10 @@
-#include <at89x52.h>
+﻿#include <at89x52.h>
 
 #define uint unsigned int
 #define uchar unsigned char
 //buttons connected to P3.2 and P3.3
-//这里可能要在DE-10上面编辑一下P3in的连接方式，确保START_STOP和CLEAR_KEY正确连接到P3.2和P3.3
-#define START_STOP P2
-#define CLEAR_KEY P1
+#define START_STOP P3.2
+#define CLEAR_KEY P3.3
 //7-segment code for digits 0-9
 __code uchar seg_table[] =
 {
