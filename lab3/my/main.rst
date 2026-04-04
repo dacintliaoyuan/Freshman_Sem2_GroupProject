@@ -1,0 +1,755 @@
+                              1 ;--------------------------------------------------------
+                              2 ; File Created by SDCC : free open source ANSI-C Compiler
+                              3 ; Version 3.0.0 #6037 (Oct 31 2010) (MINGW32)
+                              4 ; This file was generated Tue Mar 31 14:13:50 2026
+                              5 ;--------------------------------------------------------
+                              6 	.module main
+                              7 	.optsdcc -mmcs51 --model-small
+                              8 	
+                              9 ;--------------------------------------------------------
+                             10 ; Public variables in this module
+                             11 ;--------------------------------------------------------
+                             12 	.globl _main
+                             13 	.globl _UART_Recv
+                             14 	.globl _UART_Send
+                             15 	.globl _UART_Init
+                             16 	.globl _Rled_Init
+                             17 	.globl _CY
+                             18 	.globl _AC
+                             19 	.globl _F0
+                             20 	.globl _RS1
+                             21 	.globl _RS0
+                             22 	.globl _OV
+                             23 	.globl _FL
+                             24 	.globl _P
+                             25 	.globl _TF2
+                             26 	.globl _EXF2
+                             27 	.globl _RCLK
+                             28 	.globl _TCLK
+                             29 	.globl _EXEN2
+                             30 	.globl _TR2
+                             31 	.globl _C_T2
+                             32 	.globl _CP_RL2
+                             33 	.globl _T2CON_7
+                             34 	.globl _T2CON_6
+                             35 	.globl _T2CON_5
+                             36 	.globl _T2CON_4
+                             37 	.globl _T2CON_3
+                             38 	.globl _T2CON_2
+                             39 	.globl _T2CON_1
+                             40 	.globl _T2CON_0
+                             41 	.globl _PT2
+                             42 	.globl _PS
+                             43 	.globl _PT1
+                             44 	.globl _PX1
+                             45 	.globl _PT0
+                             46 	.globl _PX0
+                             47 	.globl _RD
+                             48 	.globl _WR
+                             49 	.globl _T1
+                             50 	.globl _T0
+                             51 	.globl _INT1
+                             52 	.globl _INT0
+                             53 	.globl _TXD
+                             54 	.globl _RXD
+                             55 	.globl _P3_7
+                             56 	.globl _P3_6
+                             57 	.globl _P3_5
+                             58 	.globl _P3_4
+                             59 	.globl _P3_3
+                             60 	.globl _P3_2
+                             61 	.globl _P3_1
+                             62 	.globl _P3_0
+                             63 	.globl _EA
+                             64 	.globl _ET2
+                             65 	.globl _ES
+                             66 	.globl _ET1
+                             67 	.globl _EX1
+                             68 	.globl _ET0
+                             69 	.globl _EX0
+                             70 	.globl _P2_7
+                             71 	.globl _P2_6
+                             72 	.globl _P2_5
+                             73 	.globl _P2_4
+                             74 	.globl _P2_3
+                             75 	.globl _P2_2
+                             76 	.globl _P2_1
+                             77 	.globl _P2_0
+                             78 	.globl _SM0
+                             79 	.globl _SM1
+                             80 	.globl _SM2
+                             81 	.globl _REN
+                             82 	.globl _TB8
+                             83 	.globl _RB8
+                             84 	.globl _TI
+                             85 	.globl _RI
+                             86 	.globl _T2EX
+                             87 	.globl _T2
+                             88 	.globl _P1_7
+                             89 	.globl _P1_6
+                             90 	.globl _P1_5
+                             91 	.globl _P1_4
+                             92 	.globl _P1_3
+                             93 	.globl _P1_2
+                             94 	.globl _P1_1
+                             95 	.globl _P1_0
+                             96 	.globl _TF1
+                             97 	.globl _TR1
+                             98 	.globl _TF0
+                             99 	.globl _TR0
+                            100 	.globl _IE1
+                            101 	.globl _IT1
+                            102 	.globl _IE0
+                            103 	.globl _IT0
+                            104 	.globl _P0_7
+                            105 	.globl _P0_6
+                            106 	.globl _P0_5
+                            107 	.globl _P0_4
+                            108 	.globl _P0_3
+                            109 	.globl _P0_2
+                            110 	.globl _P0_1
+                            111 	.globl _P0_0
+                            112 	.globl _B
+                            113 	.globl _A
+                            114 	.globl _ACC
+                            115 	.globl _PSW
+                            116 	.globl _TH2
+                            117 	.globl _TL2
+                            118 	.globl _RCAP2H
+                            119 	.globl _RCAP2L
+                            120 	.globl _T2MOD
+                            121 	.globl _T2CON
+                            122 	.globl _IP
+                            123 	.globl _P3
+                            124 	.globl _IE
+                            125 	.globl _P2
+                            126 	.globl _SBUF
+                            127 	.globl _SCON
+                            128 	.globl _P1
+                            129 	.globl _TH1
+                            130 	.globl _TH0
+                            131 	.globl _TL1
+                            132 	.globl _TL0
+                            133 	.globl _TMOD
+                            134 	.globl _TCON
+                            135 	.globl _PCON
+                            136 	.globl _DPH
+                            137 	.globl _DPL
+                            138 	.globl _SP
+                            139 	.globl _P0
+                            140 ;--------------------------------------------------------
+                            141 ; special function registers
+                            142 ;--------------------------------------------------------
+                            143 	.area RSEG    (ABS,DATA)
+   0000                     144 	.org 0x0000
+                    0080    145 G$P0$0$0 == 0x0080
+                    0080    146 _P0	=	0x0080
+                    0081    147 G$SP$0$0 == 0x0081
+                    0081    148 _SP	=	0x0081
+                    0082    149 G$DPL$0$0 == 0x0082
+                    0082    150 _DPL	=	0x0082
+                    0083    151 G$DPH$0$0 == 0x0083
+                    0083    152 _DPH	=	0x0083
+                    0087    153 G$PCON$0$0 == 0x0087
+                    0087    154 _PCON	=	0x0087
+                    0088    155 G$TCON$0$0 == 0x0088
+                    0088    156 _TCON	=	0x0088
+                    0089    157 G$TMOD$0$0 == 0x0089
+                    0089    158 _TMOD	=	0x0089
+                    008A    159 G$TL0$0$0 == 0x008a
+                    008A    160 _TL0	=	0x008a
+                    008B    161 G$TL1$0$0 == 0x008b
+                    008B    162 _TL1	=	0x008b
+                    008C    163 G$TH0$0$0 == 0x008c
+                    008C    164 _TH0	=	0x008c
+                    008D    165 G$TH1$0$0 == 0x008d
+                    008D    166 _TH1	=	0x008d
+                    0090    167 G$P1$0$0 == 0x0090
+                    0090    168 _P1	=	0x0090
+                    0098    169 G$SCON$0$0 == 0x0098
+                    0098    170 _SCON	=	0x0098
+                    0099    171 G$SBUF$0$0 == 0x0099
+                    0099    172 _SBUF	=	0x0099
+                    00A0    173 G$P2$0$0 == 0x00a0
+                    00A0    174 _P2	=	0x00a0
+                    00A8    175 G$IE$0$0 == 0x00a8
+                    00A8    176 _IE	=	0x00a8
+                    00B0    177 G$P3$0$0 == 0x00b0
+                    00B0    178 _P3	=	0x00b0
+                    00B8    179 G$IP$0$0 == 0x00b8
+                    00B8    180 _IP	=	0x00b8
+                    00C8    181 G$T2CON$0$0 == 0x00c8
+                    00C8    182 _T2CON	=	0x00c8
+                    00C9    183 G$T2MOD$0$0 == 0x00c9
+                    00C9    184 _T2MOD	=	0x00c9
+                    00CA    185 G$RCAP2L$0$0 == 0x00ca
+                    00CA    186 _RCAP2L	=	0x00ca
+                    00CB    187 G$RCAP2H$0$0 == 0x00cb
+                    00CB    188 _RCAP2H	=	0x00cb
+                    00CC    189 G$TL2$0$0 == 0x00cc
+                    00CC    190 _TL2	=	0x00cc
+                    00CD    191 G$TH2$0$0 == 0x00cd
+                    00CD    192 _TH2	=	0x00cd
+                    00D0    193 G$PSW$0$0 == 0x00d0
+                    00D0    194 _PSW	=	0x00d0
+                    00E0    195 G$ACC$0$0 == 0x00e0
+                    00E0    196 _ACC	=	0x00e0
+                    00E0    197 G$A$0$0 == 0x00e0
+                    00E0    198 _A	=	0x00e0
+                    00F0    199 G$B$0$0 == 0x00f0
+                    00F0    200 _B	=	0x00f0
+                            201 ;--------------------------------------------------------
+                            202 ; special function bits
+                            203 ;--------------------------------------------------------
+                            204 	.area RSEG    (ABS,DATA)
+   0000                     205 	.org 0x0000
+                    0080    206 G$P0_0$0$0 == 0x0080
+                    0080    207 _P0_0	=	0x0080
+                    0081    208 G$P0_1$0$0 == 0x0081
+                    0081    209 _P0_1	=	0x0081
+                    0082    210 G$P0_2$0$0 == 0x0082
+                    0082    211 _P0_2	=	0x0082
+                    0083    212 G$P0_3$0$0 == 0x0083
+                    0083    213 _P0_3	=	0x0083
+                    0084    214 G$P0_4$0$0 == 0x0084
+                    0084    215 _P0_4	=	0x0084
+                    0085    216 G$P0_5$0$0 == 0x0085
+                    0085    217 _P0_5	=	0x0085
+                    0086    218 G$P0_6$0$0 == 0x0086
+                    0086    219 _P0_6	=	0x0086
+                    0087    220 G$P0_7$0$0 == 0x0087
+                    0087    221 _P0_7	=	0x0087
+                    0088    222 G$IT0$0$0 == 0x0088
+                    0088    223 _IT0	=	0x0088
+                    0089    224 G$IE0$0$0 == 0x0089
+                    0089    225 _IE0	=	0x0089
+                    008A    226 G$IT1$0$0 == 0x008a
+                    008A    227 _IT1	=	0x008a
+                    008B    228 G$IE1$0$0 == 0x008b
+                    008B    229 _IE1	=	0x008b
+                    008C    230 G$TR0$0$0 == 0x008c
+                    008C    231 _TR0	=	0x008c
+                    008D    232 G$TF0$0$0 == 0x008d
+                    008D    233 _TF0	=	0x008d
+                    008E    234 G$TR1$0$0 == 0x008e
+                    008E    235 _TR1	=	0x008e
+                    008F    236 G$TF1$0$0 == 0x008f
+                    008F    237 _TF1	=	0x008f
+                    0090    238 G$P1_0$0$0 == 0x0090
+                    0090    239 _P1_0	=	0x0090
+                    0091    240 G$P1_1$0$0 == 0x0091
+                    0091    241 _P1_1	=	0x0091
+                    0092    242 G$P1_2$0$0 == 0x0092
+                    0092    243 _P1_2	=	0x0092
+                    0093    244 G$P1_3$0$0 == 0x0093
+                    0093    245 _P1_3	=	0x0093
+                    0094    246 G$P1_4$0$0 == 0x0094
+                    0094    247 _P1_4	=	0x0094
+                    0095    248 G$P1_5$0$0 == 0x0095
+                    0095    249 _P1_5	=	0x0095
+                    0096    250 G$P1_6$0$0 == 0x0096
+                    0096    251 _P1_6	=	0x0096
+                    0097    252 G$P1_7$0$0 == 0x0097
+                    0097    253 _P1_7	=	0x0097
+                    0090    254 G$T2$0$0 == 0x0090
+                    0090    255 _T2	=	0x0090
+                    0091    256 G$T2EX$0$0 == 0x0091
+                    0091    257 _T2EX	=	0x0091
+                    0098    258 G$RI$0$0 == 0x0098
+                    0098    259 _RI	=	0x0098
+                    0099    260 G$TI$0$0 == 0x0099
+                    0099    261 _TI	=	0x0099
+                    009A    262 G$RB8$0$0 == 0x009a
+                    009A    263 _RB8	=	0x009a
+                    009B    264 G$TB8$0$0 == 0x009b
+                    009B    265 _TB8	=	0x009b
+                    009C    266 G$REN$0$0 == 0x009c
+                    009C    267 _REN	=	0x009c
+                    009D    268 G$SM2$0$0 == 0x009d
+                    009D    269 _SM2	=	0x009d
+                    009E    270 G$SM1$0$0 == 0x009e
+                    009E    271 _SM1	=	0x009e
+                    009F    272 G$SM0$0$0 == 0x009f
+                    009F    273 _SM0	=	0x009f
+                    00A0    274 G$P2_0$0$0 == 0x00a0
+                    00A0    275 _P2_0	=	0x00a0
+                    00A1    276 G$P2_1$0$0 == 0x00a1
+                    00A1    277 _P2_1	=	0x00a1
+                    00A2    278 G$P2_2$0$0 == 0x00a2
+                    00A2    279 _P2_2	=	0x00a2
+                    00A3    280 G$P2_3$0$0 == 0x00a3
+                    00A3    281 _P2_3	=	0x00a3
+                    00A4    282 G$P2_4$0$0 == 0x00a4
+                    00A4    283 _P2_4	=	0x00a4
+                    00A5    284 G$P2_5$0$0 == 0x00a5
+                    00A5    285 _P2_5	=	0x00a5
+                    00A6    286 G$P2_6$0$0 == 0x00a6
+                    00A6    287 _P2_6	=	0x00a6
+                    00A7    288 G$P2_7$0$0 == 0x00a7
+                    00A7    289 _P2_7	=	0x00a7
+                    00A8    290 G$EX0$0$0 == 0x00a8
+                    00A8    291 _EX0	=	0x00a8
+                    00A9    292 G$ET0$0$0 == 0x00a9
+                    00A9    293 _ET0	=	0x00a9
+                    00AA    294 G$EX1$0$0 == 0x00aa
+                    00AA    295 _EX1	=	0x00aa
+                    00AB    296 G$ET1$0$0 == 0x00ab
+                    00AB    297 _ET1	=	0x00ab
+                    00AC    298 G$ES$0$0 == 0x00ac
+                    00AC    299 _ES	=	0x00ac
+                    00AD    300 G$ET2$0$0 == 0x00ad
+                    00AD    301 _ET2	=	0x00ad
+                    00AF    302 G$EA$0$0 == 0x00af
+                    00AF    303 _EA	=	0x00af
+                    00B0    304 G$P3_0$0$0 == 0x00b0
+                    00B0    305 _P3_0	=	0x00b0
+                    00B1    306 G$P3_1$0$0 == 0x00b1
+                    00B1    307 _P3_1	=	0x00b1
+                    00B2    308 G$P3_2$0$0 == 0x00b2
+                    00B2    309 _P3_2	=	0x00b2
+                    00B3    310 G$P3_3$0$0 == 0x00b3
+                    00B3    311 _P3_3	=	0x00b3
+                    00B4    312 G$P3_4$0$0 == 0x00b4
+                    00B4    313 _P3_4	=	0x00b4
+                    00B5    314 G$P3_5$0$0 == 0x00b5
+                    00B5    315 _P3_5	=	0x00b5
+                    00B6    316 G$P3_6$0$0 == 0x00b6
+                    00B6    317 _P3_6	=	0x00b6
+                    00B7    318 G$P3_7$0$0 == 0x00b7
+                    00B7    319 _P3_7	=	0x00b7
+                    00B0    320 G$RXD$0$0 == 0x00b0
+                    00B0    321 _RXD	=	0x00b0
+                    00B1    322 G$TXD$0$0 == 0x00b1
+                    00B1    323 _TXD	=	0x00b1
+                    00B2    324 G$INT0$0$0 == 0x00b2
+                    00B2    325 _INT0	=	0x00b2
+                    00B3    326 G$INT1$0$0 == 0x00b3
+                    00B3    327 _INT1	=	0x00b3
+                    00B4    328 G$T0$0$0 == 0x00b4
+                    00B4    329 _T0	=	0x00b4
+                    00B5    330 G$T1$0$0 == 0x00b5
+                    00B5    331 _T1	=	0x00b5
+                    00B6    332 G$WR$0$0 == 0x00b6
+                    00B6    333 _WR	=	0x00b6
+                    00B7    334 G$RD$0$0 == 0x00b7
+                    00B7    335 _RD	=	0x00b7
+                    00B8    336 G$PX0$0$0 == 0x00b8
+                    00B8    337 _PX0	=	0x00b8
+                    00B9    338 G$PT0$0$0 == 0x00b9
+                    00B9    339 _PT0	=	0x00b9
+                    00BA    340 G$PX1$0$0 == 0x00ba
+                    00BA    341 _PX1	=	0x00ba
+                    00BB    342 G$PT1$0$0 == 0x00bb
+                    00BB    343 _PT1	=	0x00bb
+                    00BC    344 G$PS$0$0 == 0x00bc
+                    00BC    345 _PS	=	0x00bc
+                    00BD    346 G$PT2$0$0 == 0x00bd
+                    00BD    347 _PT2	=	0x00bd
+                    00C8    348 G$T2CON_0$0$0 == 0x00c8
+                    00C8    349 _T2CON_0	=	0x00c8
+                    00C9    350 G$T2CON_1$0$0 == 0x00c9
+                    00C9    351 _T2CON_1	=	0x00c9
+                    00CA    352 G$T2CON_2$0$0 == 0x00ca
+                    00CA    353 _T2CON_2	=	0x00ca
+                    00CB    354 G$T2CON_3$0$0 == 0x00cb
+                    00CB    355 _T2CON_3	=	0x00cb
+                    00CC    356 G$T2CON_4$0$0 == 0x00cc
+                    00CC    357 _T2CON_4	=	0x00cc
+                    00CD    358 G$T2CON_5$0$0 == 0x00cd
+                    00CD    359 _T2CON_5	=	0x00cd
+                    00CE    360 G$T2CON_6$0$0 == 0x00ce
+                    00CE    361 _T2CON_6	=	0x00ce
+                    00CF    362 G$T2CON_7$0$0 == 0x00cf
+                    00CF    363 _T2CON_7	=	0x00cf
+                    00C8    364 G$CP_RL2$0$0 == 0x00c8
+                    00C8    365 _CP_RL2	=	0x00c8
+                    00C9    366 G$C_T2$0$0 == 0x00c9
+                    00C9    367 _C_T2	=	0x00c9
+                    00CA    368 G$TR2$0$0 == 0x00ca
+                    00CA    369 _TR2	=	0x00ca
+                    00CB    370 G$EXEN2$0$0 == 0x00cb
+                    00CB    371 _EXEN2	=	0x00cb
+                    00CC    372 G$TCLK$0$0 == 0x00cc
+                    00CC    373 _TCLK	=	0x00cc
+                    00CD    374 G$RCLK$0$0 == 0x00cd
+                    00CD    375 _RCLK	=	0x00cd
+                    00CE    376 G$EXF2$0$0 == 0x00ce
+                    00CE    377 _EXF2	=	0x00ce
+                    00CF    378 G$TF2$0$0 == 0x00cf
+                    00CF    379 _TF2	=	0x00cf
+                    00D0    380 G$P$0$0 == 0x00d0
+                    00D0    381 _P	=	0x00d0
+                    00D1    382 G$FL$0$0 == 0x00d1
+                    00D1    383 _FL	=	0x00d1
+                    00D2    384 G$OV$0$0 == 0x00d2
+                    00D2    385 _OV	=	0x00d2
+                    00D3    386 G$RS0$0$0 == 0x00d3
+                    00D3    387 _RS0	=	0x00d3
+                    00D4    388 G$RS1$0$0 == 0x00d4
+                    00D4    389 _RS1	=	0x00d4
+                    00D5    390 G$F0$0$0 == 0x00d5
+                    00D5    391 _F0	=	0x00d5
+                    00D6    392 G$AC$0$0 == 0x00d6
+                    00D6    393 _AC	=	0x00d6
+                    00D7    394 G$CY$0$0 == 0x00d7
+                    00D7    395 _CY	=	0x00d7
+                            396 ;--------------------------------------------------------
+                            397 ; overlayable register banks
+                            398 ;--------------------------------------------------------
+                            399 	.area REG_BANK_0	(REL,OVR,DATA)
+   0000                     400 	.ds 8
+                            401 ;--------------------------------------------------------
+                            402 ; internal ram data
+                            403 ;--------------------------------------------------------
+                            404 	.area DSEG    (DATA)
+                            405 ;--------------------------------------------------------
+                            406 ; overlayable items in internal ram 
+                            407 ;--------------------------------------------------------
+                            408 	.area OSEG    (OVR,DATA)
+                            409 ;--------------------------------------------------------
+                            410 ; Stack segment in internal ram 
+                            411 ;--------------------------------------------------------
+                            412 	.area	SSEG	(DATA)
+   0008                     413 __start__stack:
+   0008                     414 	.ds	1
+                            415 
+                            416 ;--------------------------------------------------------
+                            417 ; indirectly addressable internal ram data
+                            418 ;--------------------------------------------------------
+                            419 	.area ISEG    (DATA)
+                            420 ;--------------------------------------------------------
+                            421 ; absolute internal ram data
+                            422 ;--------------------------------------------------------
+                            423 	.area IABS    (ABS,DATA)
+                            424 	.area IABS    (ABS,DATA)
+                            425 ;--------------------------------------------------------
+                            426 ; bit data
+                            427 ;--------------------------------------------------------
+                            428 	.area BSEG    (BIT)
+                            429 ;--------------------------------------------------------
+                            430 ; paged external ram data
+                            431 ;--------------------------------------------------------
+                            432 	.area PSEG    (PAG,XDATA)
+                            433 ;--------------------------------------------------------
+                            434 ; external ram data
+                            435 ;--------------------------------------------------------
+                            436 	.area XSEG    (XDATA)
+                            437 ;--------------------------------------------------------
+                            438 ; absolute external ram data
+                            439 ;--------------------------------------------------------
+                            440 	.area XABS    (ABS,XDATA)
+                            441 ;--------------------------------------------------------
+                            442 ; external initialized ram data
+                            443 ;--------------------------------------------------------
+                            444 	.area XISEG   (XDATA)
+                            445 	.area HOME    (CODE)
+                            446 	.area GSINIT0 (CODE)
+                            447 	.area GSINIT1 (CODE)
+                            448 	.area GSINIT2 (CODE)
+                            449 	.area GSINIT3 (CODE)
+                            450 	.area GSINIT4 (CODE)
+                            451 	.area GSINIT5 (CODE)
+                            452 	.area GSINIT  (CODE)
+                            453 	.area GSFINAL (CODE)
+                            454 	.area CSEG    (CODE)
+                            455 ;--------------------------------------------------------
+                            456 ; interrupt vector 
+                            457 ;--------------------------------------------------------
+                            458 	.area HOME    (CODE)
+   0000                     459 __interrupt_vect:
+   0000 02 00 08            460 	ljmp	__sdcc_gsinit_startup
+                            461 ;--------------------------------------------------------
+                            462 ; global & static initialisations
+                            463 ;--------------------------------------------------------
+                            464 	.area HOME    (CODE)
+                            465 	.area GSINIT  (CODE)
+                            466 	.area GSFINAL (CODE)
+                            467 	.area GSINIT  (CODE)
+                            468 	.globl __sdcc_gsinit_startup
+                            469 	.globl __sdcc_program_startup
+                            470 	.globl __start__stack
+                            471 	.globl __mcs51_genXINIT
+                            472 	.globl __mcs51_genXRAMCLEAR
+                            473 	.globl __mcs51_genRAMCLEAR
+                            474 	.area GSFINAL (CODE)
+   0061 02 00 03            475 	ljmp	__sdcc_program_startup
+                            476 ;--------------------------------------------------------
+                            477 ; Home
+                            478 ;--------------------------------------------------------
+                            479 	.area HOME    (CODE)
+                            480 	.area HOME    (CODE)
+   0003                     481 __sdcc_program_startup:
+   0003 12 00 8C            482 	lcall	_main
+                            483 ;	return from main will lock up
+   0006 80 FE               484 	sjmp .
+                            485 ;--------------------------------------------------------
+                            486 ; code
+                            487 ;--------------------------------------------------------
+                            488 	.area CSEG    (CODE)
+                            489 ;------------------------------------------------------------
+                            490 ;Allocation info for local variables in function 'Rled_Init'
+                            491 ;------------------------------------------------------------
+                            492 ;------------------------------------------------------------
+                    0000    493 	G$Rled_Init$0$0 ==.
+                    0000    494 	C$main.c$5$0$0 ==.
+                            495 ;	main.c:5: void Rled_Init()
+                            496 ;	-----------------------------------------
+                            497 ;	 function Rled_Init
+                            498 ;	-----------------------------------------
+   0064                     499 _Rled_Init:
+                    0002    500 	ar2 = 0x02
+                    0003    501 	ar3 = 0x03
+                    0004    502 	ar4 = 0x04
+                    0005    503 	ar5 = 0x05
+                    0006    504 	ar6 = 0x06
+                    0007    505 	ar7 = 0x07
+                    0000    506 	ar0 = 0x00
+                    0001    507 	ar1 = 0x01
+                    0000    508 	C$main.c$7$1$1 ==.
+                            509 ;	main.c:7: P0 = 0x2A;
+   0064 75 80 2A            510 	mov	_P0,#0x2A
+                    0003    511 	C$main.c$8$1$1 ==.
+                    0003    512 	XG$Rled_Init$0$0 ==.
+   0067 22                  513 	ret
+                            514 ;------------------------------------------------------------
+                            515 ;Allocation info for local variables in function 'UART_Init'
+                            516 ;------------------------------------------------------------
+                            517 ;------------------------------------------------------------
+                    0004    518 	G$UART_Init$0$0 ==.
+                    0004    519 	C$main.c$10$1$1 ==.
+                            520 ;	main.c:10: void UART_Init() {
+                            521 ;	-----------------------------------------
+                            522 ;	 function UART_Init
+                            523 ;	-----------------------------------------
+   0068                     524 _UART_Init:
+                    0004    525 	C$main.c$11$1$1 ==.
+                            526 ;	main.c:11: SCON = 0x50; //设置串口为模式1，8位数据，可变波特率
+   0068 75 98 50            527 	mov	_SCON,#0x50
+                    0007    528 	C$main.c$12$1$1 ==.
+                            529 ;	main.c:12: TMOD |= 0x20; //定时器1工作在模式2
+   006B 43 89 20            530 	orl	_TMOD,#0x20
+                    000A    531 	C$main.c$13$1$1 ==.
+                            532 ;	main.c:13: TH1 = 0xCC;
+   006E 75 8D CC            533 	mov	_TH1,#0xCC
+                    000D    534 	C$main.c$14$1$1 ==.
+                            535 ;	main.c:14: TL1 = 0xCC; 
+   0071 75 8B CC            536 	mov	_TL1,#0xCC
+                    0010    537 	C$main.c$15$1$1 ==.
+                            538 ;	main.c:15: TR1 = 1; //启动定时器1
+   0074 D2 8E               539 	setb	_TR1
+                    0012    540 	C$main.c$16$1$1 ==.
+                            541 ;	main.c:16: TI = 1;
+   0076 D2 99               542 	setb	_TI
+                    0014    543 	C$main.c$17$1$1 ==.
+                    0014    544 	XG$UART_Init$0$0 ==.
+   0078 22                  545 	ret
+                            546 ;------------------------------------------------------------
+                            547 ;Allocation info for local variables in function 'UART_Send'
+                            548 ;------------------------------------------------------------
+                            549 ;byte                      Allocated to registers r2 
+                            550 ;------------------------------------------------------------
+                    0015    551 	G$UART_Send$0$0 ==.
+                    0015    552 	C$main.c$19$1$1 ==.
+                            553 ;	main.c:19: void  UART_Send(uchar byte) {
+                            554 ;	-----------------------------------------
+                            555 ;	 function UART_Send
+                            556 ;	-----------------------------------------
+   0079                     557 _UART_Send:
+   0079 AA 82               558 	mov	r2,dpl
+                    0017    559 	C$main.c$20$1$1 ==.
+                            560 ;	main.c:20: while (!TI); //等待发送完成
+   007B                     561 00101$:
+                    0017    562 	C$main.c$21$1$1 ==.
+                            563 ;	main.c:21: TI = 0; //清除发送完成标志
+   007B 10 99 02            564 	jbc	_TI,00108$
+   007E 80 FB               565 	sjmp	00101$
+   0080                     566 00108$:
+                    001C    567 	C$main.c$22$1$1 ==.
+                            568 ;	main.c:22: SBUF = byte; //将数据写入发送缓冲区
+   0080 8A 99               569 	mov	_SBUF,r2
+                    001E    570 	C$main.c$23$1$1 ==.
+                    001E    571 	XG$UART_Send$0$0 ==.
+   0082 22                  572 	ret
+                            573 ;------------------------------------------------------------
+                            574 ;Allocation info for local variables in function 'UART_Recv'
+                            575 ;------------------------------------------------------------
+                            576 ;------------------------------------------------------------
+                    001F    577 	G$UART_Recv$0$0 ==.
+                    001F    578 	C$main.c$24$1$1 ==.
+                            579 ;	main.c:24: uchar UART_Recv(void) {
+                            580 ;	-----------------------------------------
+                            581 ;	 function UART_Recv
+                            582 ;	-----------------------------------------
+   0083                     583 _UART_Recv:
+                    001F    584 	C$main.c$25$1$1 ==.
+                            585 ;	main.c:25: while (!RI); //等待接收完成
+   0083                     586 00101$:
+                    001F    587 	C$main.c$26$1$1 ==.
+                            588 ;	main.c:26: RI = 0; //清除接收完成标志
+   0083 10 98 02            589 	jbc	_RI,00108$
+   0086 80 FB               590 	sjmp	00101$
+   0088                     591 00108$:
+                    0024    592 	C$main.c$27$1$1 ==.
+                            593 ;	main.c:27: return SBUF; //返回接收到的数据
+   0088 85 99 82            594 	mov	dpl,_SBUF
+                    0027    595 	C$main.c$28$1$1 ==.
+                    0027    596 	XG$UART_Recv$0$0 ==.
+   008B 22                  597 	ret
+                            598 ;------------------------------------------------------------
+                            599 ;Allocation info for local variables in function 'main'
+                            600 ;------------------------------------------------------------
+                            601 ;a                         Allocated to registers r2 
+                            602 ;b                         Allocated to registers r4 
+                            603 ;c                         Allocated to registers r3 
+                            604 ;op                        Allocated to registers r3 
+                            605 ;------------------------------------------------------------
+                    0028    606 	G$main$0$0 ==.
+                    0028    607 	C$main.c$30$1$1 ==.
+                            608 ;	main.c:30: void main() {
+                            609 ;	-----------------------------------------
+                            610 ;	 function main
+                            611 ;	-----------------------------------------
+   008C                     612 _main:
+                    0028    613 	C$main.c$31$1$1 ==.
+                            614 ;	main.c:31: Rled_Init(); //初始化LED
+   008C 12 00 64            615 	lcall	_Rled_Init
+                    002B    616 	C$main.c$32$1$1 ==.
+                            617 ;	main.c:32: UART_Init(); //初始化UART
+   008F 12 00 68            618 	lcall	_UART_Init
+                    002E    619 	C$main.c$33$1$1 ==.
+                            620 ;	main.c:33: UART_Send(0x00);//发送初始值
+   0092 75 82 00            621 	mov	dpl,#0x00
+   0095 12 00 79            622 	lcall	_UART_Send
+                    0034    623 	C$main.c$36$1$1 ==.
+                            624 ;	main.c:36: while (1) {
+   0098                     625 00111$:
+                    0034    626 	C$main.c$39$2$2 ==.
+                            627 ;	main.c:39: a = UART_Recv(); //接收第一个数
+   0098 12 00 83            628 	lcall	_UART_Recv
+   009B AA 82               629 	mov	r2,dpl
+                    0039    630 	C$main.c$40$2$2 ==.
+                            631 ;	main.c:40: SBUF = a;
+   009D 8A 99               632 	mov	_SBUF,r2
+                    003B    633 	C$main.c$41$2$2 ==.
+                            634 ;	main.c:41: op = UART_Recv(); //接收运算符
+   009F C0 02               635 	push	ar2
+   00A1 12 00 83            636 	lcall	_UART_Recv
+   00A4 AB 82               637 	mov	r3,dpl
+                    0042    638 	C$main.c$42$2$2 ==.
+                            639 ;	main.c:42: SBUF = op;
+   00A6 8B 99               640 	mov	_SBUF,r3
+                    0044    641 	C$main.c$43$2$2 ==.
+                            642 ;	main.c:43: b = UART_Recv(); //接收第二个数
+   00A8 C0 03               643 	push	ar3
+   00AA 12 00 83            644 	lcall	_UART_Recv
+   00AD AC 82               645 	mov	r4,dpl
+   00AF D0 03               646 	pop	ar3
+   00B1 D0 02               647 	pop	ar2
+                    004F    648 	C$main.c$44$2$2 ==.
+                            649 ;	main.c:44: SBUF = b;
+   00B3 8C 99               650 	mov	_SBUF,r4
+                    0051    651 	C$main.c$45$2$2 ==.
+                            652 ;	main.c:45: switch (op) {
+   00B5 BB 2A 02            653 	cjne	r3,#0x2A,00121$
+   00B8 80 1A               654 	sjmp	00103$
+   00BA                     655 00121$:
+   00BA BB 2B 02            656 	cjne	r3,#0x2B,00122$
+   00BD 80 0A               657 	sjmp	00101$
+   00BF                     658 00122$:
+   00BF BB 2D 02            659 	cjne	r3,#0x2D,00123$
+   00C2 80 0A               660 	sjmp	00102$
+   00C4                     661 00123$:
+                    0060    662 	C$main.c$46$3$3 ==.
+                            663 ;	main.c:46: case '+':
+   00C4 BB 2F 38            664 	cjne	r3,#0x2F,00108$
+   00C7 80 12               665 	sjmp	00104$
+   00C9                     666 00101$:
+                    0065    667 	C$main.c$47$3$3 ==.
+                            668 ;	main.c:47: c = a + b;
+   00C9 EC                  669 	mov	a,r4
+   00CA 2A                  670 	add	a,r2
+   00CB FB                  671 	mov	r3,a
+                    0068    672 	C$main.c$48$3$3 ==.
+                            673 ;	main.c:48: break;
+                    0068    674 	C$main.c$49$3$3 ==.
+                            675 ;	main.c:49: case '-':
+   00CC 80 33               676 	sjmp	00109$
+   00CE                     677 00102$:
+                    006A    678 	C$main.c$50$3$3 ==.
+                            679 ;	main.c:50: c = a - b;
+   00CE EA                  680 	mov	a,r2
+   00CF C3                  681 	clr	c
+   00D0 9C                  682 	subb	a,r4
+   00D1 FB                  683 	mov	r3,a
+                    006E    684 	C$main.c$51$3$3 ==.
+                            685 ;	main.c:51: break;
+                    006E    686 	C$main.c$52$3$3 ==.
+                            687 ;	main.c:52: case '*':
+   00D2 80 2D               688 	sjmp	00109$
+   00D4                     689 00103$:
+                    0070    690 	C$main.c$53$3$3 ==.
+                            691 ;	main.c:53: c = a * b;
+   00D4 8C F0               692 	mov	b,r4
+   00D6 EA                  693 	mov	a,r2
+   00D7 A4                  694 	mul	ab
+   00D8 FB                  695 	mov	r3,a
+                    0075    696 	C$main.c$54$3$3 ==.
+                            697 ;	main.c:54: break;
+                    0075    698 	C$main.c$55$3$3 ==.
+                            699 ;	main.c:55: case '/':
+   00D9 80 26               700 	sjmp	00109$
+   00DB                     701 00104$:
+                    0077    702 	C$main.c$56$3$3 ==.
+                            703 ;	main.c:56: if (b != 0) {
+   00DB EC                  704 	mov	a,r4
+   00DC 60 1D               705 	jz	00106$
+                    007A    706 	C$main.c$57$4$4 ==.
+                            707 ;	main.c:57: c = a / b;
+   00DE C2 D5               708 	clr	F0
+   00E0 EC                  709 	mov	a,r4
+   00E1 30 E7 04            710 	jnb	acc.7,00126$
+   00E4 B2 D5               711 	cpl	F0
+   00E6 F4                  712 	cpl	a
+   00E7 04                  713 	inc	a
+   00E8                     714 00126$:
+   00E8 F5 F0               715 	mov	b,a
+   00EA EA                  716 	mov	a,r2
+   00EB 30 E7 04            717 	jnb	acc.7,00127$
+   00EE B2 D5               718 	cpl	F0
+   00F0 F4                  719 	cpl	a
+   00F1 04                  720 	inc	a
+   00F2                     721 00127$:
+   00F2 84                  722 	div	ab
+   00F3 30 D5 02            723 	jnb	F0,00128$
+   00F6 F4                  724 	cpl	a
+   00F7 04                  725 	inc	a
+   00F8                     726 00128$:
+   00F8 FB                  727 	mov	r3,a
+   00F9 80 06               728 	sjmp	00109$
+   00FB                     729 00106$:
+                    0097    730 	C$main.c$60$4$5 ==.
+                            731 ;	main.c:60: c = 0; //除数为0时返回0
+   00FB 7B 00               732 	mov	r3,#0x00
+                    0099    733 	C$main.c$62$3$3 ==.
+                            734 ;	main.c:62: break;
+                    0099    735 	C$main.c$63$3$3 ==.
+                            736 ;	main.c:63: default:
+   00FD 80 02               737 	sjmp	00109$
+   00FF                     738 00108$:
+                    009B    739 	C$main.c$64$3$3 ==.
+                            740 ;	main.c:64: c = 0; //无效运算符时返回0
+   00FF 7B 00               741 	mov	r3,#0x00
+                    009D    742 	C$main.c$65$2$2 ==.
+                            743 ;	main.c:65: }
+   0101                     744 00109$:
+                    009D    745 	C$main.c$66$2$2 ==.
+                            746 ;	main.c:66: UART_Send(c); //发送结果
+   0101 8B 82               747 	mov	dpl,r3
+   0103 12 00 79            748 	lcall	_UART_Send
+                    00A2    749 	C$main.c$68$1$1 ==.
+                    00A2    750 	XG$main$0$0 ==.
+   0106 80 90               751 	sjmp	00111$
+                            752 	.area CSEG    (CODE)
+                            753 	.area CONST   (CODE)
+                            754 	.area XINIT   (CODE)
+                            755 	.area CABS    (ABS,CODE)

@@ -1,0 +1,68 @@
+#include <at89x52.h>
+#define uint unsigned int
+#define uchar unsigned char
+
+void Rled_Init()
+{
+    P0 = 0x2A;
+}
+//初始化UART
+void UART_Init() {
+    SCON = 0x50; //设置串口为模式1，8位数据，可变波特率
+    TMOD |= 0x20; //定时器1工作在模式2
+    TH1 = 0xCC;
+    TL1 = 0xCC; 
+    TR1 = 1; //启动定时器1
+    TI = 1;
+    }
+
+void  UART_Send(uchar byte) {
+    while (!TI); //等待发送完成
+    TI = 0; //清除发送完成标志
+    SBUF = byte; //将数据写入发送缓冲区
+}
+uchar UART_Recv(void) {
+    while (!RI); //等待接收完成
+    RI = 0; //清除接收完成标志
+    return SBUF; //返回接收到的数据
+}
+//上面函数别动
+void main() {
+    Rled_Init(); //初始化LED
+    UART_Init(); //初始化UART
+    UART_Send(0x00);//发送初始值
+    //signed char a, b, c;
+    //uchar op;
+    while (1) {
+    	signed char a, b, c;
+    	uchar op;
+        a = UART_Recv(); //接收第一个数
+        SBUF = a;
+        op = UART_Recv(); //接收运算符
+        SBUF = op;
+        b = UART_Recv(); //接收第二个数
+        SBUF = b;
+        switch (op) {
+            case '+':
+                c = a + b;
+                break;
+            case '-':
+                c = a - b;
+                break;
+            case '*':
+                c = a * b;
+                break;
+            case '/':
+                if (b != 0) {
+                    c = a / b;
+                } 
+                else {
+                    c = 0; //除数为0时返回0
+                }
+                break;
+            default:
+                c = 0; //无效运算符时返回0
+        }
+        //UART_Send(c); //发送结果
+    }
+}
