@@ -1,4 +1,5 @@
 #include <AT89x52.h>
+#include <stdlib.h>
 #define uchar unsigned char
 #define uint unsigned int
 
@@ -17,7 +18,7 @@
 #define FAIL_2 0x43   // 1000011 (两竖线 | |)
 
 uchar timer = 60;      // 倒计时秒数
-uchar target_num = 50; // 待猜数字 (实验要求初始为50)
+uchar target_num ; // 待猜数字
 uchar my_guess = 0;    // 玩家当前的猜测
 uchar ms_tick = 0;     // 中断计数(25ms * 40 = 1s)
 __bit game_running = 0;  // 游戏运行状态
@@ -42,7 +43,7 @@ void System_Init(void)
     EX0 = 1;  // 使能外部中断0
     EX1 = 1;  // 使能外部中断1
     EA = 1;  // 开启总中断
-    TR0 = 0; // 初始不运行计时器
+    TR0 = 1; // 启动定时器0
 }
 
 void update_display(void)
@@ -73,7 +74,7 @@ void Timer0_ISR(void) __interrupt (1)
             else
             {
                 game_running = 0; 
-                TR0 = 0; // 时间到，游戏结束
+                //TR0 = 0; // 时间到，游戏结束
             }
         }
     }
@@ -100,8 +101,11 @@ void interrupt_start(void) __interrupt (0)
 {
     if (!game_running && timer == 60)
     {
+        // 【新增】利用用户按下按键的随机时刻作为种子
+        srand(TL0); 
+        target_num = rand() % 100; 
+        // 生成 0-99 的随机数
         game_running = 1;
-        TR0 = 1; // 启动计时器
     }
     else if (game_running)
     {
@@ -114,7 +118,7 @@ void interrupt_start(void) __interrupt (0)
         {
             P1 = DISP_Y;
             game_running = 0; // 猜中，停止计时
-            TR0 = 0;
+            //TR0 = 0;
         }
     }
 }
@@ -123,6 +127,7 @@ void interrupt_modify(void) __interrupt (2)
 {
     if (game_running)
     {
+        P0 = 0xFF;        // 先将P0设为输入模式以读取开关状态
         // 读取开关状态更新猜测数字
         my_guess = P0; // 直接读取P0的输入值作为猜测
         update_display(); // 更新显示
