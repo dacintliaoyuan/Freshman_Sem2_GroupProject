@@ -36,7 +36,7 @@ void System_Init(void)
     TMOD &= 0xF0;
     TMOD |= 0x01;
     TH0 = 0x3C; 
-    TL0 = 0x08;
+    TL0 = 0xB0;
     ET0 = 1; // 开启定时器中断
     IT0 = 1; // 开启外部中断0 (Key1)
     IT1 = 1; // 开启外部中断1 (Key2)
@@ -54,7 +54,7 @@ void update_display(void)
     P0 = ((my_guess / 10) << 4) | (my_guess % 10);
 }
 
-// --- 定时器0 中断服务 每 1ms 触发 ---
+// --- 定时器0 中断服务 每 25ms 触发 ---
 void Timer0_ISR(void) __interrupt (1)
 {
     if (game_running)
@@ -90,7 +90,7 @@ void Timer0_ISR(void) __interrupt (1)
 }
 
 uchar led_pattern = 0xAA; // 初始LED模式（10101010）
-uint last_led_tick = 0;   // 用于锁定毫秒
+uchar last_led_tick = 0;   // 用于锁定毫秒
 void led_refresh(void)
 {
     #define STATE_PLAYING 0
@@ -106,20 +106,20 @@ void led_refresh(void)
     else if (P1 == DISP_Y)
         game_state = STATE_WIN;
 
-    // 1. 胜利特效：跑马灯 (250ms 刷新一次)
+    // 1. 胜利特效：跑马灯 (1ms 刷新一次)
     if (game_state == STATE_WIN)
     {
-        if (ms_tick - last_led_tick >= 250) 
+        if (ms_tick - last_led_tick >= 1) 
         {
             last_led_tick = ms_tick;
             led_pattern = (led_pattern << 1) | (led_pattern >> 7);
             P3 = led_pattern; 
         }
     }
-    // 2. 失败特效：闪烁 (40ms 刷新一次)
+    // 2. 失败特效：闪烁 (50ms 刷新一次)
     else if (game_state == STATE_FAIL)
     {
-        if (ms_tick - last_led_tick >= 40) 
+        if (ms_tick - last_led_tick >= 2) 
         {
             last_led_tick = ms_tick;
             flash_state = !flash_state;
