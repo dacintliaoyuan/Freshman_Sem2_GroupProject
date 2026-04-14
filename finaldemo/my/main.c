@@ -32,11 +32,11 @@ void System_Init(void)
     my_guess = 0;
     timer = 60;
 
-    // 定时器0配置: 模式1 (16位定时器),1ms中断
+    // 定时器0配置: 模式1 (16位定时器),25ms计数一次
     TMOD &= 0xF0;
     TMOD |= 0x01;
-    TH0 = (65536 - 1000) / 256; // 1ms 定时器初值 
-    TL0 = (65536 - 1000) % 256;
+    TH0 = 0x3C; 
+    TL0 = 0x08;
     ET0 = 1; // 开启定时器中断
     IT0 = 1; // 开启外部中断0 (Key1)
     IT1 = 1; // 开启外部中断1 (Key2)
@@ -60,7 +60,7 @@ void Timer0_ISR(void) __interrupt (1)
     if (game_running)
     {
         ms_tick++;
-        if (ms_tick >= 1000)
+        if (ms_tick >= 40)
         { // 累积到 1秒
             ms_tick = 0;
             // 每秒更新一次倒计时显示
@@ -80,8 +80,8 @@ void Timer0_ISR(void) __interrupt (1)
     {
         // 游戏失败后的闪烁逻辑
         ms_tick++;
-        if (ms_tick >= 250)
-        { // 每 250ms 闪烁一次
+        if (ms_tick >= 40)
+        { // 每 40ms 闪烁一次
             ms_tick = 0;
             flash_state = !flash_state;
             P1 = flash_state ? FAIL_1 : FAIL_2;
@@ -116,10 +116,10 @@ void led_refresh(void)
             P3 = led_pattern; 
         }
     }
-    // 2. 失败特效：闪烁 (400ms 刷新一次)
+    // 2. 失败特效：闪烁 (40ms 刷新一次)
     else if (game_state == STATE_FAIL)
     {
-        if (ms_tick - last_led_tick >= 400) 
+        if (ms_tick - last_led_tick >= 40) 
         {
             last_led_tick = ms_tick;
             flash_state = !flash_state;

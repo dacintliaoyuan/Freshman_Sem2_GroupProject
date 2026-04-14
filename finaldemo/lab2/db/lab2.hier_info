@@ -25,13 +25,13 @@ hex1[3] <= decoder7seg:inst4.seg_out[3]
 hex1[4] <= decoder7seg:inst4.seg_out[4]
 hex1[5] <= decoder7seg:inst4.seg_out[5]
 hex1[6] <= decoder7seg:inst4.seg_out[6]
-hex2[0] <= Judge:inst7.seg_out[0]
-hex2[1] <= Judge:inst7.seg_out[1]
-hex2[2] <= Judge:inst7.seg_out[2]
-hex2[3] <= Judge:inst7.seg_out[3]
-hex2[4] <= Judge:inst7.seg_out[4]
-hex2[5] <= Judge:inst7.seg_out[5]
-hex2[6] <= Judge:inst7.seg_out[6]
+hex2[0] <= Judge:it.seg_out[0]
+hex2[1] <= Judge:it.seg_out[1]
+hex2[2] <= Judge:it.seg_out[2]
+hex2[3] <= Judge:it.seg_out[3]
+hex2[4] <= Judge:it.seg_out[4]
+hex2[5] <= Judge:it.seg_out[5]
+hex2[6] <= Judge:it.seg_out[6]
 hex4[0] <= decoder7seg:inst6.seg_out[0]
 hex4[1] <= decoder7seg:inst6.seg_out[1]
 hex4[2] <= decoder7seg:inst6.seg_out[2]
@@ -11125,7 +11125,7 @@ seg_out[5] <= Mux1.DB_MAX_OUTPUT_PORT_TYPE
 seg_out[6] <= Mux0.DB_MAX_OUTPUT_PORT_TYPE
 
 
-|lab2|Judge:inst7
+|lab2|Judge:it
 port_in[0] => seg_out[0].DATAIN
 port_in[1] => seg_out[1].DATAIN
 port_in[2] => seg_out[2].DATAIN
