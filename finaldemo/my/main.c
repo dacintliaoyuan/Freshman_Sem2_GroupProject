@@ -1,4 +1,4 @@
-#include <AT89x52.h>
+﻿#include <at89x52.h>
 #include <stdlib.h>
 #define uchar unsigned char
 #define uint unsigned int
@@ -20,7 +20,7 @@
 uchar timer = 60;      // 倒计时秒数
 uchar target_num ; // 待猜数字
 uchar my_guess = 0;    // 玩家当前的猜测
-uchar ms_tick = 0;     // 中断计数(25ms * 40 = 1s)
+uint ms_tick = 0;     // 中断计数(1ms计数器)
 __bit game_running = 0;  // 游戏运行状态
 __bit flash_state = 0;   // 失败闪烁切换位
 void System_Init(void)
@@ -32,11 +32,11 @@ void System_Init(void)
     my_guess = 0;
     timer = 60;
 
-    // 定时器0配置: 模式1 (16位定时器), 25ms中断周期
+    // 定时器0配置: 模式1 (16位定时器),1ms中断
     TMOD &= 0xF0;
     TMOD |= 0x01;
-    TH0 = 0x3C;
-    TL0 = 0xB0;
+    TH0 = (65536 - 1000) / 256; // 1ms 定时器初值 
+    TL0 = (65536 - 1000) % 256;
     ET0 = 1; // 开启定时器中断
     IT0 = 1; // 开启外部中断0 (Key1)
     IT1 = 1; // 开启外部中断1 (Key2)
@@ -54,15 +54,13 @@ void update_display(void)
     P0 = ((my_guess / 10) << 4) | (my_guess % 10);
 }
 
-// --- 定时器0 中断服务 (每25ms执行一次) ---
+// --- 定时器0 中断服务 每 1ms 触发 ---
 void Timer0_ISR(void) __interrupt (1)
 {
-    TH0 = 0x3C; // 重装初值
-    TL0 = 0xB0;
     if (game_running)
     {
         ms_tick++;
-        if (ms_tick >= 40)
+        if (ms_tick >= 1000)
         { // 累积到 1秒
             ms_tick = 0;
             // 每秒更新一次倒计时显示
@@ -82,7 +80,7 @@ void Timer0_ISR(void) __interrupt (1)
     {
         // 游戏失败后的闪烁逻辑
         ms_tick++;
-        if (ms_tick >= 10)
+        if (ms_tick >= 250)
         { // 每 250ms 闪烁一次
             ms_tick = 0;
             flash_state = !flash_state;
@@ -91,11 +89,76 @@ void Timer0_ISR(void) __interrupt (1)
     }
 }
 
-void led_init(void)
+uchar led_pattern = 0xAA; // 初始LED模式（10101010）
+uint last_led_tick = 0;   // 用于锁定毫秒
+void led_refresh(void)
 {
-    P3 = 0xAA;
+    #define STATE_PLAYING 0
+    #define STATE_WIN 1
+    #define STATE_FAIL 2
+    uchar game_state = STATE_PLAYING; 
+    
+    // 判断游戏状态
+    if (game_running && timer > 0)
+        game_state = STATE_PLAYING;
+    else if (timer == 0)
+        game_state = STATE_FAIL;
+    else if (P1 == DISP_Y)
+        game_state = STATE_WIN;
+
+    // 1. 胜利特效：跑马灯 (250ms 刷新一次)
+    if (game_state == STATE_WIN)
+    {
+        if (ms_tick - last_led_tick >= 250) 
+        {
+            last_led_tick = ms_tick;
+            led_pattern = (led_pattern << 1) | (led_pattern >> 7);
+            P3 = led_pattern; 
+        }
+    }
+    // 2. 失败特效：闪烁 (400ms 刷新一次)
+    else if (game_state == STATE_FAIL)
+    {
+        if (ms_tick - last_led_tick >= 400) 
+        {
+            last_led_tick = ms_tick;
+            flash_state = !flash_state;
+            P3 = flash_state ? 0xFF : 0x00; 
+        }
+    }
+    
+    // 3. 游戏进行中：静止
+    else
+    {
+        P3 = 0xAA; 
+    }
 }
 
+/*
+if (game_state == STATE_WIN)
+    {
+        if (ms_tick % 250 == 0) 
+        {
+            led_pattern = (led_pattern << 1) | (led_pattern >> 7);
+            P3 = led_pattern; 
+        }
+    }
+    // 2. 失败特效：闪烁 (400ms 刷新一次)
+    else if (game_state == STATE_FAIL)
+    {
+        if (ms_tick % 400 == 0) 
+        {
+            flash_state = !flash_state;
+            P3 = flash_state ? 0xFF : 0x00; 
+        }
+    }
+*/
+
+
+void led_init(void)
+{
+    P3 = 0xAA; // 初始LED状态（10101010）
+}
 
 void interrupt_start(void) __interrupt (0)
 {
@@ -132,6 +195,7 @@ void interrupt_modify(void) __interrupt (2)
         my_guess = P0; // 直接读取P0的输入值作为猜测
         update_display(); // 更新显示
     }
+    
 }
 
 // --- 主程序循环 ---
@@ -143,5 +207,6 @@ void main()
 
     while (1)
     {
+        led_refresh(); // 刷新LED显示特效
     }
 }

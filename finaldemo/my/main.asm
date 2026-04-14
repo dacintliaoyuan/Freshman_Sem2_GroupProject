@@ -1,10 +1,10 @@
 ;--------------------------------------------------------
-; File Created by SDCC : free open source ISO C Compiler
-; Version 4.5.0 #15242 (MINGW64)
+; File Created by SDCC : free open source ANSI-C Compiler
+; Version 4.2.0 #13081 (Linux)
 ;--------------------------------------------------------
 	.module main
-	
 	.optsdcc -mmcs51 --model-small
+	
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
@@ -15,6 +15,8 @@
 	.globl _Timer0_ISR
 	.globl _update_display
 	.globl _System_Init
+	.globl _srand
+	.globl _rand
 	.globl _CY
 	.globl _AC
 	.globl _F0
@@ -311,10 +313,11 @@ _ms_tick::
 ;--------------------------------------------------------
 ; overlayable items in internal ram
 ;--------------------------------------------------------
+	.area	OSEG    (OVR,DATA)
 ;--------------------------------------------------------
 ; Stack segment in internal ram
 ;--------------------------------------------------------
-	.area SSEG
+	.area	SSEG
 __start__stack:
 	.ds	1
 
@@ -340,7 +343,7 @@ _flash_state::
 ;--------------------------------------------------------
 	.area PSEG    (PAG,XDATA)
 ;--------------------------------------------------------
-; uninitialized external ram data
+; external ram data
 ;--------------------------------------------------------
 	.area XSEG    (XDATA)
 ;--------------------------------------------------------
@@ -348,7 +351,7 @@ _flash_state::
 ;--------------------------------------------------------
 	.area XABS    (ABS,XDATA)
 ;--------------------------------------------------------
-; initialized external ram data
+; external initialized ram data
 ;--------------------------------------------------------
 	.area XISEG   (XDATA)
 	.area HOME    (CODE)
@@ -372,64 +375,6 @@ __interrupt_vect:
 	ljmp	_Timer0_ISR
 	.ds	5
 	ljmp	_interrupt_modify
-; restartable atomic support routines
-	.ds	2
-sdcc_atomic_exchange_rollback_start::
-	nop
-	nop
-sdcc_atomic_exchange_pdata_impl:
-	movx	a, @r0
-	mov	r3, a
-	mov	a, r2
-	movx	@r0, a
-	sjmp	sdcc_atomic_exchange_exit
-	nop
-	nop
-sdcc_atomic_exchange_xdata_impl:
-	movx	a, @dptr
-	mov	r3, a
-	mov	a, r2
-	movx	@dptr, a
-	sjmp	sdcc_atomic_exchange_exit
-sdcc_atomic_compare_exchange_idata_impl:
-	mov	a, @r0
-	cjne	a, ar2, .+#5
-	mov	a, r3
-	mov	@r0, a
-	ret
-	nop
-sdcc_atomic_compare_exchange_pdata_impl:
-	movx	a, @r0
-	cjne	a, ar2, .+#5
-	mov	a, r3
-	movx	@r0, a
-	ret
-	nop
-sdcc_atomic_compare_exchange_xdata_impl:
-	movx	a, @dptr
-	cjne	a, ar2, .+#5
-	mov	a, r3
-	movx	@dptr, a
-	ret
-sdcc_atomic_exchange_rollback_end::
-
-sdcc_atomic_exchange_gptr_impl::
-	jnb	b.6, sdcc_atomic_exchange_xdata_impl
-	mov	r0, dpl
-	jb	b.5, sdcc_atomic_exchange_pdata_impl
-sdcc_atomic_exchange_idata_impl:
-	mov	a, r2
-	xch	a, @r0
-	mov	dpl, a
-	ret
-sdcc_atomic_exchange_exit:
-	mov	dpl, r3
-	ret
-sdcc_atomic_compare_exchange_gptr_impl::
-	jnb	b.6, sdcc_atomic_compare_exchange_xdata_impl
-	mov	r0, dpl
-	jb	b.5, sdcc_atomic_compare_exchange_pdata_impl
-	sjmp	sdcc_atomic_compare_exchange_idata_impl
 ;--------------------------------------------------------
 ; global & static initialisations
 ;--------------------------------------------------------
@@ -443,18 +388,16 @@ sdcc_atomic_compare_exchange_gptr_impl::
 	.globl __mcs51_genXINIT
 	.globl __mcs51_genXRAMCLEAR
 	.globl __mcs51_genRAMCLEAR
-;	main.c:19: uchar timer = 60;      // 倒计时秒数
+;	main.c:20: uchar timer = 60;      // 倒计时秒数
 	mov	_timer,#0x3c
-;	main.c:20: uchar target_num = 50; // 待猜数字 (实验要求初始为50)
-	mov	_target_num,#0x32
-;	main.c:21: uchar my_guess = 0;    // 玩家当前的猜测
+;	main.c:22: uchar my_guess = 0;    // 玩家当前的猜测
 	mov	_my_guess,#0x00
-;	main.c:22: uchar ms_tick = 0;     // 中断计数(25ms * 40 = 1s)
+;	main.c:23: uchar ms_tick = 0;     // 中断计数(25ms * 40 = 1s)
 	mov	_ms_tick,#0x00
-;	main.c:23: __bit game_running = 0;  // 游戏运行状态
+;	main.c:24: __bit game_running = 0;  // 游戏运行状态
 ;	assignBit
 	clr	_game_running
-;	main.c:24: __bit flash_state = 0;   // 失败闪烁切换位
+;	main.c:25: __bit flash_state = 0;   // 失败闪烁切换位
 ;	assignBit
 	clr	_flash_state
 	.area GSFINAL (CODE)
@@ -474,7 +417,7 @@ __sdcc_program_startup:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'System_Init'
 ;------------------------------------------------------------
-;	main.c:25: void System_Init(void)
+;	main.c:26: void System_Init(void)
 ;	-----------------------------------------
 ;	 function System_Init
 ;	-----------------------------------------
@@ -487,251 +430,334 @@ _System_Init:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	main.c:27: P0 = 0xFF;     // 设定为输入模式以读取开关，同时显示初始数字
+;	main.c:28: P0 = 0xFF;     // 设定为输入模式以读取开关，同时显示初始数字
 	mov	_P0,#0xff
-;	main.c:28: P1 = DISP_OFF; // 初始状态显示熄灭
+;	main.c:29: P1 = DISP_OFF; // 初始状态显示熄灭
 	mov	_P1,#0x7f
-;	main.c:29: P2 = 0x60;     // 初始显示 60 秒
+;	main.c:30: P2 = 0x60;     // 初始显示 60 秒
 	mov	_P2,#0x60
-;	main.c:31: my_guess = 0;
+;	main.c:32: my_guess = 0;
 	mov	_my_guess,#0x00
-;	main.c:32: timer = 60;
+;	main.c:33: timer = 60;
 	mov	_timer,#0x3c
-;	main.c:35: TMOD &= 0xF0;
+;	main.c:36: TMOD &= 0xF0;
 	anl	_TMOD,#0xf0
-;	main.c:36: TMOD |= 0x01;
+;	main.c:37: TMOD |= 0x01;
 	orl	_TMOD,#0x01
-;	main.c:37: TH0 = 0x3C;
+;	main.c:38: TH0 = 0x3C;
 	mov	_TH0,#0x3c
-;	main.c:38: TL0 = 0xB0;
+;	main.c:39: TL0 = 0xB0;
 	mov	_TL0,#0xb0
-;	main.c:39: ET0 = 1; // 开启定时器中断
+;	main.c:40: ET0 = 1; // 开启定时器中断
 ;	assignBit
 	setb	_ET0
-;	main.c:40: IT0 = 1; // 开启外部中断0 (Key1)
+;	main.c:41: IT0 = 1; // 开启外部中断0 (Key1)
 ;	assignBit
 	setb	_IT0
-;	main.c:41: IT1 = 1; // 开启外部中断1 (Key2)
+;	main.c:42: IT1 = 1; // 开启外部中断1 (Key2)
 ;	assignBit
 	setb	_IT1
-;	main.c:42: EX0 = 1;  // 使能外部中断0
+;	main.c:43: EX0 = 1;  // 使能外部中断0
 ;	assignBit
 	setb	_EX0
-;	main.c:43: EX1 = 1;  // 使能外部中断1
+;	main.c:44: EX1 = 1;  // 使能外部中断1
 ;	assignBit
 	setb	_EX1
-;	main.c:44: EA = 1;  // 开启总中断
+;	main.c:45: EA = 1;  // 开启总中断
 ;	assignBit
 	setb	_EA
-;	main.c:45: TR0 = 0; // 初始不运行计时器
+;	main.c:46: TR0 = 1; // 启动定时器0
 ;	assignBit
-	clr	_TR0
-;	main.c:46: }
+	setb	_TR0
+;	main.c:47: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'update_display'
 ;------------------------------------------------------------
-;	main.c:48: void update_display(void)
+;	main.c:49: void update_display(void)
 ;	-----------------------------------------
 ;	 function update_display
 ;	-----------------------------------------
 _update_display:
-;	main.c:51: P2 = ((timer / 10) << 4) | (timer % 10);
-	mov	r7,_timer
-	mov	ar6,r7
-	mov	b,#0x0a
-	mov	a,r6
-	div	ab
+;	main.c:52: P2 = ((timer / 10) << 4) | (timer % 10);
+	mov	r6,_timer
+	mov	r7,#0x00
+	mov	__divsint_PARM_2,#0x0a
+;	1-genFromRTrack replaced	mov	(__divsint_PARM_2 + 1),#0x00
+	mov	(__divsint_PARM_2 + 1),r7
+	mov	dpl,r6
+	mov	dph,r7
+	push	ar7
+	push	ar6
+	lcall	__divsint
+	mov	r4,dpl
+	pop	ar6
+	pop	ar7
+	mov	a,r4
 	swap	a
 	anl	a,#0xf0
-	mov	r6,a
-	mov	b,#0x0a
-	mov	a,r7
-	div	ab
-	mov	a,b
-	orl	a,r6
+	mov	r4,a
+	mov	__modsint_PARM_2,#0x0a
+	mov	(__modsint_PARM_2 + 1),#0x00
+	mov	dpl,r6
+	mov	dph,r7
+	push	ar4
+	lcall	__modsint
+	mov	r6,dpl
+	pop	ar4
+	mov	a,r6
+	orl	a,r4
 	mov	_P2,a
-;	main.c:53: P0 = ((my_guess / 10) << 4) | (my_guess % 10);
-	mov	r7,_my_guess
-	mov	ar6,r7
-	mov	b,#0x0a
-	mov	a,r6
-	div	ab
+;	main.c:54: P0 = ((my_guess / 10) << 4) | (my_guess % 10);
+	mov	r6,_my_guess
+	mov	r7,#0x00
+	mov	__divsint_PARM_2,#0x0a
+;	1-genFromRTrack replaced	mov	(__divsint_PARM_2 + 1),#0x00
+	mov	(__divsint_PARM_2 + 1),r7
+	mov	dpl,r6
+	mov	dph,r7
+	push	ar7
+	push	ar6
+	lcall	__divsint
+	mov	r4,dpl
+	pop	ar6
+	pop	ar7
+	mov	a,r4
 	swap	a
 	anl	a,#0xf0
-	mov	r6,a
-	mov	b,#0x0a
-	mov	a,r7
-	div	ab
-	mov	a,b
-	orl	a,r6
+	mov	r4,a
+	mov	__modsint_PARM_2,#0x0a
+	mov	(__modsint_PARM_2 + 1),#0x00
+	mov	dpl,r6
+	mov	dph,r7
+	push	ar4
+	lcall	__modsint
+	mov	r6,dpl
+	pop	ar4
+	mov	a,r6
+	orl	a,r4
 	mov	_P0,a
-;	main.c:54: }
+;	main.c:55: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'Timer0_ISR'
 ;------------------------------------------------------------
-;	main.c:57: void Timer0_ISR(void) __interrupt (1)
+;	main.c:58: void Timer0_ISR(void) __interrupt (1)
 ;	-----------------------------------------
 ;	 function Timer0_ISR
 ;	-----------------------------------------
 _Timer0_ISR:
+	push	bits
 	push	acc
 	push	b
-	push	ar7
-	push	ar6
+	push	dpl
+	push	dph
+	push	(0+7)
+	push	(0+6)
+	push	(0+5)
+	push	(0+4)
+	push	(0+3)
+	push	(0+2)
+	push	(0+1)
+	push	(0+0)
 	push	psw
 	mov	psw,#0x00
-;	main.c:59: TH0 = 0x3C; // 重装初值
-	mov	_TH0,#0x3c
-;	main.c:60: TL0 = 0xB0;
-	mov	_TL0,#0xb0
-;	main.c:61: if (game_running)
+;	main.c:60: if (game_running)
 	jnb	_game_running,00111$
-;	main.c:63: ms_tick++;
+;	main.c:62: ms_tick++;
 	inc	_ms_tick
-;	main.c:64: if (ms_tick >= 40)
+;	main.c:63: if (ms_tick >= 40)
 	mov	a,#0x100 - 0x28
 	add	a,_ms_tick
 	jnc	00113$
-;	main.c:66: ms_tick = 0;
+;	main.c:65: ms_tick = 0;
 	mov	_ms_tick,#0x00
-;	main.c:68: if (timer > 0)
+;	main.c:67: if (timer > 0)
 	mov	a,_timer
 	jz	00102$
-;	main.c:70: timer--;
+;	main.c:69: timer--;
 	dec	_timer
-;	main.c:71: P2 = ((timer / 10) << 4) | (timer % 10);
-	mov	r7,_timer
-	mov	ar6,r7
-	mov	b,#0x0a
-	mov	a,r6
-	div	ab
+;	main.c:70: P2 = ((timer / 10) << 4) | (timer % 10);
+	mov	r6,_timer
+	mov	r7,#0x00
+	mov	__divsint_PARM_2,#0x0a
+;	1-genFromRTrack replaced	mov	(__divsint_PARM_2 + 1),#0x00
+	mov	(__divsint_PARM_2 + 1),r7
+	mov	dpl,r6
+	mov	dph,r7
+	push	ar7
+	push	ar6
+	lcall	__divsint
+	mov	r4,dpl
+	pop	ar6
+	pop	ar7
+	mov	a,r4
 	swap	a
 	anl	a,#0xf0
-	mov	r6,a
-	mov	b,#0x0a
-	mov	a,r7
-	div	ab
-	mov	a,b
-	orl	a,r6
+	mov	r4,a
+	mov	__modsint_PARM_2,#0x0a
+	mov	(__modsint_PARM_2 + 1),#0x00
+	mov	dpl,r6
+	mov	dph,r7
+	push	ar4
+	lcall	__modsint
+	mov	r6,dpl
+	mov	r7,dph
+	pop	ar4
+	mov	a,r6
+	orl	a,r4
 	mov	_P2,a
 	sjmp	00113$
 00102$:
-;	main.c:75: game_running = 0; 
+;	main.c:74: game_running = 0; 
 ;	assignBit
 	clr	_game_running
-;	main.c:76: TR0 = 0; // 时间到，游戏结束
-;	assignBit
-	clr	_TR0
 	sjmp	00113$
 00111$:
-;	main.c:80: else if (timer == 0)
+;	main.c:79: else if (timer == 0)
 	mov	a,_timer
 	jnz	00113$
-;	main.c:83: ms_tick++;
+;	main.c:82: ms_tick++;
 	inc	_ms_tick
-;	main.c:84: if (ms_tick >= 10)
+;	main.c:83: if (ms_tick >= 10)
 	mov	a,#0x100 - 0x0a
 	add	a,_ms_tick
 	jnc	00113$
-;	main.c:86: ms_tick = 0;
+;	main.c:85: ms_tick = 0;
 	mov	_ms_tick,#0x00
-;	main.c:87: flash_state = !flash_state;
+;	main.c:86: flash_state = !flash_state;
 	cpl	_flash_state
-;	main.c:88: P1 = flash_state ? FAIL_1 : FAIL_2;
+;	main.c:87: P1 = flash_state ? FAIL_1 : FAIL_2;
 	jnb	_flash_state,00115$
-	mov	r7,#0x36
+	mov	r6,#0x36
+	mov	r7,#0x00
 	sjmp	00116$
 00115$:
-	mov	r7,#0x43
+	mov	r6,#0x43
+	mov	r7,#0x00
 00116$:
-	mov	_P1,r7
+	mov	_P1,r6
 00113$:
-;	main.c:91: }
+;	main.c:90: }
 	pop	psw
-	pop	ar6
-	pop	ar7
+	pop	(0+0)
+	pop	(0+1)
+	pop	(0+2)
+	pop	(0+3)
+	pop	(0+4)
+	pop	(0+5)
+	pop	(0+6)
+	pop	(0+7)
+	pop	dph
+	pop	dpl
 	pop	b
 	pop	acc
+	pop	bits
 	reti
-;	eliminated unneeded push/pop dpl
-;	eliminated unneeded push/pop dph
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'led_init'
 ;------------------------------------------------------------
-;	main.c:93: void led_init(void)
+;	main.c:92: void led_init(void)
 ;	-----------------------------------------
 ;	 function led_init
 ;	-----------------------------------------
 _led_init:
-;	main.c:95: P3 = 0xAA;
+;	main.c:94: P3 = 0xAA;
 	mov	_P3,#0xaa
-;	main.c:96: }
+;	main.c:95: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'interrupt_start'
 ;------------------------------------------------------------
-;	main.c:99: void interrupt_start(void) __interrupt (0)
+;	main.c:98: void interrupt_start(void) __interrupt (0)
 ;	-----------------------------------------
 ;	 function interrupt_start
 ;	-----------------------------------------
 _interrupt_start:
+	push	bits
 	push	acc
+	push	b
+	push	dpl
+	push	dph
+	push	(0+7)
+	push	(0+6)
+	push	(0+5)
+	push	(0+4)
+	push	(0+3)
+	push	(0+2)
+	push	(0+1)
+	push	(0+0)
 	push	psw
-;	main.c:101: if (!game_running && timer == 60)
+	mov	psw,#0x00
+;	main.c:100: if (!game_running && timer == 60)
 	jb	_game_running,00110$
 	mov	a,#0x3c
 	cjne	a,_timer,00110$
-;	main.c:103: game_running = 1;
+;	main.c:103: srand(TL0); 
+	mov	r6,_TL0
+	mov	r7,#0x00
+	mov	dpl,r6
+	mov	dph,r7
+	lcall	_srand
+;	main.c:104: target_num = rand() % 100; 
+	lcall	_rand
+	mov	__modsint_PARM_2,#0x64
+	mov	(__modsint_PARM_2 + 1),#0x00
+	lcall	__modsint
+	mov	r6,dpl
+	mov	r7,dph
+	mov	_target_num,r6
+;	main.c:106: game_running = 1;
 ;	assignBit
 	setb	_game_running
-;	main.c:104: TR0 = 1; // 启动计时器
-;	assignBit
-	setb	_TR0
 	sjmp	00113$
 00110$:
-;	main.c:106: else if (game_running)
+;	main.c:108: else if (game_running)
 	jnb	_game_running,00113$
-;	main.c:109: if (my_guess > target_num)
+;	main.c:111: if (my_guess > target_num)
 	clr	c
 	mov	a,_target_num
 	subb	a,_my_guess
 	jnc	00105$
-;	main.c:110: P1 = DISP_H;
+;	main.c:112: P1 = DISP_H;
 	mov	_P1,#0x09
 	sjmp	00113$
 00105$:
-;	main.c:111: else if (my_guess < target_num)
+;	main.c:113: else if (my_guess < target_num)
 	clr	c
 	mov	a,_my_guess
 	subb	a,_target_num
 	jnc	00102$
-;	main.c:112: P1 = DISP_L;
+;	main.c:114: P1 = DISP_L;
 	mov	_P1,#0x47
 	sjmp	00113$
 00102$:
-;	main.c:115: P1 = DISP_Y;
+;	main.c:117: P1 = DISP_Y;
 	mov	_P1,#0x11
-;	main.c:116: game_running = 0; // 猜中，停止计时
+;	main.c:118: game_running = 0; // 猜中，停止计时
 ;	assignBit
 	clr	_game_running
-;	main.c:117: TR0 = 0;
-;	assignBit
-	clr	_TR0
 00113$:
-;	main.c:120: }
+;	main.c:122: }
 	pop	psw
+	pop	(0+0)
+	pop	(0+1)
+	pop	(0+2)
+	pop	(0+3)
+	pop	(0+4)
+	pop	(0+5)
+	pop	(0+6)
+	pop	(0+7)
+	pop	dph
+	pop	dpl
+	pop	b
 	pop	acc
+	pop	bits
 	reti
-;	eliminated unneeded mov psw,# (no regs used in bank)
-;	eliminated unneeded push/pop dpl
-;	eliminated unneeded push/pop dph
-;	eliminated unneeded push/pop b
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'interrupt_modify'
 ;------------------------------------------------------------
-;	main.c:122: void interrupt_modify(void) __interrupt (2)
+;	main.c:124: void interrupt_modify(void) __interrupt (2)
 ;	-----------------------------------------
 ;	 function interrupt_modify
 ;	-----------------------------------------
@@ -751,14 +777,16 @@ _interrupt_modify:
 	push	(0+0)
 	push	psw
 	mov	psw,#0x00
-;	main.c:124: if (game_running)
+;	main.c:126: if (game_running)
 	jnb	_game_running,00103$
-;	main.c:127: my_guess = P0; // 直接读取P0的输入值作为猜测
+;	main.c:128: P0 = 0xFF;        // 先将P0设为输入模式以读取开关状态
+	mov	_P0,#0xff
+;	main.c:130: my_guess = P0; // 直接读取P0的输入值作为猜测
 	mov	_my_guess,_P0
-;	main.c:128: update_display(); // 更新显示
+;	main.c:131: update_display(); // 更新显示
 	lcall	_update_display
 00103$:
-;	main.c:130: }
+;	main.c:133: }
 	pop	psw
 	pop	(0+0)
 	pop	(0+1)
@@ -777,20 +805,20 @@ _interrupt_modify:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'main'
 ;------------------------------------------------------------
-;	main.c:133: void main()
+;	main.c:136: void main()
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
 _main:
-;	main.c:135: System_Init();
+;	main.c:138: System_Init();
 	lcall	_System_Init
-;	main.c:136: update_display(); // 显示初始 60 00
+;	main.c:139: update_display(); // 显示初始 60 00
 	lcall	_update_display
-;	main.c:137: led_init();       // 初始化LED显示
+;	main.c:140: led_init();       // 初始化LED显示
 	lcall	_led_init
-;	main.c:139: while (1)
+;	main.c:142: while (1)
 00102$:
-;	main.c:142: }
+;	main.c:145: }
 	sjmp	00102$
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
