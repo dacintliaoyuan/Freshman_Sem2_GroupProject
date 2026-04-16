@@ -1,5 +1,5 @@
 Analysis & Synthesis report for lab2
-Tue Apr 14 15:24:49 2026
+Thu Apr 16 20:10:41 2026
 Quartus Prime Version 22.1std.0 Build 915 10/25/2022 SC Lite Edition
 
 
@@ -70,7 +70,7 @@ https://fpgasoftware.intel.com/eula.
 +----------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                     ;
 +---------------------------------+------------------------------------------------+
-; Analysis & Synthesis Status     ; Successful - Tue Apr 14 15:24:49 2026          ;
+; Analysis & Synthesis Status     ; Successful - Thu Apr 16 20:10:41 2026          ;
 ; Quartus Prime Version           ; 22.1std.0 Build 915 10/25/2022 SC Lite Edition ;
 ; Revision Name                   ; lab2                                           ;
 ; Top-level Entity Name           ; lab2                                           ;
@@ -1301,7 +1301,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 +----------------+--------------+
 ; Partition Name ; Elapsed Time ;
 +----------------+--------------+
-; Top            ; 00:00:24     ;
+; Top            ; 00:00:27     ;
 +----------------+--------------+
 
 
@@ -1311,7 +1311,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 Info: *******************************************************************
 Info: Running Quartus Prime Analysis & Synthesis
     Info: Version 22.1std.0 Build 915 10/25/2022 SC Lite Edition
-    Info: Processing started: Tue Apr 14 15:24:08 2026
+    Info: Processing started: Thu Apr 16 20:09:52 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off lab2 -c lab2
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Info (20030): Parallel compilation is enabled and will use 16 of the 32 processors detected
@@ -1774,7 +1774,7 @@ Info (12133): Instantiated megafunction "PLL:inst1|PLL_0002:pll_inst|altera_pll:
     Info (12134): Parameter "pll_subtype" = "General"
 Info (12128): Elaborating entity "Judge" for hierarchy "Judge:it"
 Info (11170): Starting IP generation for the debug fabric: alt_sld_fab.
-Info (11172): 2026.04.14.15:24:16 Progress: Loading sld2dead247/alt_sld_fab_wrapper_hw.tcl
+Info (11172): 2026.04.16.20:10:03 Progress: Loading sld2dead247/alt_sld_fab_wrapper_hw.tcl
 Info (11172): Alt_sld_fab.alt_sld_fab: SLD fabric agents which did not specify prefer_host were connected to JTAG
 Info (11172): Alt_sld_fab: Generating alt_sld_fab "alt_sld_fab" for QUARTUS_SYNTH
 Info (11172): Alt_sld_fab: "alt_sld_fab" instantiated alt_sld_fab "alt_sld_fab"
@@ -1809,8 +1809,8 @@ Info (21057): Implemented 3856 device resources after synthesis - the final reso
     Info (21062): Implemented 1 DSP elements
 Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 69 warnings
     Info: Peak virtual memory: 5119 megabytes
-    Info: Processing ended: Tue Apr 14 15:24:49 2026
-    Info: Elapsed time: 00:00:41
-    Info: Total CPU time (on all processors): 00:00:50
+    Info: Processing ended: Thu Apr 16 20:10:41 2026
+    Info: Elapsed time: 00:00:49
+    Info: Total CPU time (on all processors): 00:01:02
 
 
