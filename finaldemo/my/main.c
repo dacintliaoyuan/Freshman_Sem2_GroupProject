@@ -6,7 +6,7 @@
 // P0: 低4位(hex0), 高4位(hex1) -> 猜测数字
 // P1: jdg[7..0] -> 中间 hex2 (状态显示)
 // P2: 低4位(hex4), 高4位(hex5) -> 倒计时显示
-// P3.2: Key1 (开始/确认), P3.3: Key2 (修改数字)
+// INT0: Key1 (开始/确认), INT1: Key2 (修改数字)
 // P0 (输入模式): sw[7..0] 开关
 
 // HEX2 状态显示定义
@@ -91,7 +91,7 @@ void Timer0_ISR(void) __interrupt (1)
 
 uchar led_pattern = 0xAA; // 初始LED模式（10101010）
 uchar last_led_tick = 0;   // 用于锁定毫秒
-void led_refresh(void)
+/*void led_refresh(void)
 {
     #define STATE_PLAYING 0
     #define STATE_WIN 1
@@ -134,7 +134,6 @@ void led_refresh(void)
     }
 }
 
-/*
 if (game_state == STATE_WIN)
     {
         if (ms_tick % 250 == 0) 
@@ -191,7 +190,6 @@ void interrupt_modify(void) __interrupt (2)
     if (game_running)
     {
         P0 = 0xFF;        // 先将P0设为输入模式以读取开关状态
-        // 读取开关状态更新猜测数字
         my_guess = P0; // 直接读取P0的输入值作为猜测
         update_display(); // 更新显示
     }
