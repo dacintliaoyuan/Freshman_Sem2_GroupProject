@@ -1,1 +1,2 @@
-sdcc main.c && packihx main.ihx > main.hex
+ cd /mnt/d/git/github/Freshman_Sem2_GroupProject/finaldemo/my/
+sdcc main.c && packihx main.ihx > main.hex && rm -f main.{asm,lst,mem,rel,rst,sym,lk,map,ihx}

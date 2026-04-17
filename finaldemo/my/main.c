@@ -207,6 +207,6 @@ void main()
 
     while (1)
     {
-        led_refresh(); // 刷新LED显示特效
+        //led_refresh(); // 刷新LED显示特效
     }
 }
