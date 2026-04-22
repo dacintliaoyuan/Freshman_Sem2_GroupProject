@@ -1,0 +1,15 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Judge is
+    Port (
+        port_in  : in  STD_LOGIC_VECTOR(7 downto 0);
+        seg_out  : out STD_LOGIC_VECTOR(6 downto 0)  
+    );
+end Judge;
+
+architecture Hardware of Judge is
+begin
+    seg_out <= port_in(6 downto 0); 
+    
+end Hardware;
